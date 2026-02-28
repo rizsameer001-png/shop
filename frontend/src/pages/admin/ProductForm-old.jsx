@@ -7,45 +7,12 @@ import { createProduct, updateProduct } from '../../store/slices/adminSlice';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
-// Supported formats
-const ACCEPTED_TYPES = [
-  'image/jpeg', 'image/jpg', 'image/png',
-  'image/webp', 'image/tiff', 'image/tif',
-  'image/bmp', 'image/gif', 'image/svg+xml',
-];
-const ACCEPTED_EXTS = /\.(jpe?g|png|webp|tiff?|bmp|gif|svg)$/i;
-
-const isValidImage = (file) =>
-  ACCEPTED_TYPES.includes(file.type) || ACCEPTED_EXTS.test(file.name);
-
-// Compress + convert to JPEG via Canvas (handles jpg, png, webp, tiff, bmp, gif)
-// TIFF/BMP: browser Canvas reads them via FileReader → drawImage → re-encode as JPEG
+// Convert file to base64 data URL (no server needed)
 const fileToDataURL = (file) =>
   new Promise((res, rej) => {
     const reader = new FileReader();
-    reader.onerror = () => rej(new Error(`Cannot read: ${file.name}`));
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onerror = () => rej(new Error(`Cannot decode: ${file.name}`));
-      img.onload = () => {
-        const MAX = 1200;
-        let { width, height } = img;
-        if (width > MAX) { height = Math.round(height * MAX / width); width = MAX; }
-        if (height > MAX) { width = Math.round(width * MAX / height); height = MAX; }
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        // White background for transparent PNGs / WebP
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-        // SVGs keep as PNG, everything else → JPEG
-        const outFormat = file.type === "image/svg+xml" ? "image/png" : "image/jpeg";
-        res(canvas.toDataURL(outFormat, 0.82));
-      };
-      img.src = e.target.result;
-    };
+    reader.onload = () => res(reader.result);
+    reader.onerror = rej;
     reader.readAsDataURL(file);
   });
 
@@ -90,10 +57,8 @@ export default function ProductForm() {
   }, [id, isEdit]);
 
   const handleFiles = async (files) => {
-    const valid = Array.from(files).filter(isValidImage);
-    const rejected = Array.from(files).filter(f => !isValidImage(f));
-    if (rejected.length) toast.error(`Skipped: ${rejected.map(f => f.name).join(', ')} — unsupported format`);
-    if (!valid.length) { toast.error('No valid images found. Supported: JPG, PNG, WebP, TIFF, BMP, GIF, SVG'); return; }
+    const valid = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (!valid.length) { toast.error('Only image files are allowed'); return; }
     if (images.length + valid.length > 8) { toast.error('Maximum 8 images allowed'); return; }
     const newImgs = await Promise.all(
       valid.map(async (file) => ({
@@ -239,7 +204,7 @@ export default function ProductForm() {
             </div>
           </div>
 
-          <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.tiff,.tif,.bmp,.gif,.svg,image/jpeg,image/png,image/webp,image/tiff,image/bmp,image/gif,image/svg+xml" multiple className="hidden"
+          <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
             onChange={e => { handleFiles(e.target.files); e.target.value = ''; }} />
 
           {/* URL Input */}
@@ -274,7 +239,7 @@ export default function ProductForm() {
                   <Upload className="w-8 h-8 text-blue-600" />
                 </div>
                 <p className="font-semibold text-gray-700 mb-1">Drop images here or click to browse</p>
-                <p className="text-sm text-gray-400">JPG · PNG · WebP · TIFF · BMP · GIF · SVG  ·  Max 8 images</p>
+                <p className="text-sm text-gray-400">PNG, JPG, WEBP · Up to 10MB each · Max 8 images</p>
                 <div className="flex items-center justify-center gap-4 mt-4">
                   <span className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">📁 From your computer</span>
                   <span className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">🔗 Or paste a URL above</span>

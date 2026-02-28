@@ -15,11 +15,6 @@ import Register from './pages/customer/Register';
 import OrderSuccess from './pages/customer/OrderSuccess';
 import MyOrders from './pages/customer/MyOrders';
 import Profile from './pages/customer/Profile';
-import About from './pages/customer/About';
-import Contact from './pages/customer/Contact';
-import FAQ from './pages/customer/FAQ';
-import Privacy from './pages/customer/Privacy';
-import Terms from './pages/customer/Terms';
 
 // Admin Pages
 import AdminLayout from './components/admin/AdminLayout';
@@ -69,11 +64,6 @@ export default function App() {
         <Route path="/order/success" element={<ProtectedRoute><CustomerLayout><OrderSuccess /></CustomerLayout></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><CustomerLayout><MyOrders /></CustomerLayout></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><CustomerLayout><Profile /></CustomerLayout></ProtectedRoute>} />
-        <Route path="/about" element={<CustomerLayout><About /></CustomerLayout>} />
-        <Route path="/contact" element={<CustomerLayout><Contact /></CustomerLayout>} />
-        <Route path="/faq" element={<CustomerLayout><FAQ /></CustomerLayout>} />
-        <Route path="/privacy" element={<CustomerLayout><Privacy /></CustomerLayout>} />
-        <Route path="/terms" element={<CustomerLayout><Terms /></CustomerLayout>} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
