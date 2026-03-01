@@ -10,9 +10,7 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       proxy: {
         '/api': {
-          target: isDev
-            ? 'http://localhost:5000'
-            : 'https://ecom-9ygt.onrender.com',
+          target: 'https://ecom-9ygt.onrender.com',
           changeOrigin: true,
           secure: true,
         },
