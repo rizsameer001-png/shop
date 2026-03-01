@@ -29,11 +29,6 @@ import AdminOrders from './pages/admin/AdminOrders';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCategories from './pages/admin/AdminCategories';
 import ProductForm from './pages/admin/ProductForm';
-import CMSHub from './pages/admin/CMSHub';
-import CMSBanners from './pages/admin/CMSBanners';
-import CMSAbout from './pages/admin/CMSAbout';
-import CMSContact from './pages/admin/CMSContact';
-import CMSSettings from './pages/admin/CMSSettings';
 
 // Layout
 import Navbar from './components/customer/Navbar';
@@ -89,11 +84,6 @@ export default function App() {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="categories" element={<AdminCategories />} />
-          <Route path="cms" element={<CMSHub />} />
-          <Route path="cms/banners" element={<CMSBanners />} />
-          <Route path="cms/about" element={<CMSAbout />} />
-          <Route path="cms/contact" element={<CMSContact />} />
-          <Route path="cms/settings" element={<CMSSettings />} />
         </Route>
       </Routes>
     </Router>

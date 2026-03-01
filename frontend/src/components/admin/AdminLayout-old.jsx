@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { LayoutDashboard, Package, ShoppingBag, Users, Tag, Menu, X, LogOut, ChevronRight, Package2, Globe } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Users, Tag, Menu, X, LogOut, ChevronRight, Package2 } from 'lucide-react';
 import { logout } from '../../store/slices/authSlice';
 import toast from 'react-hot-toast';
 
@@ -11,7 +11,6 @@ const navItems = [
   { to: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/categories', label: 'Categories', icon: Tag },
-  { to: '/admin/cms', label: 'Content (CMS)', icon: Globe },
 ];
 
 export default function AdminLayout() {
