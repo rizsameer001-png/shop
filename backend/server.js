@@ -21,28 +21,27 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 // Cookie parser
 app.use(cookieParser());
 
-
-//Enable CORS
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:3000',
-].filter(Boolean); // removes undefined
+// Enable CORS — supports multiple allowed origins via comma-separated FRONTEND_URL
+// e.g. FRONTEND_URL=https://gleeful-semolina-bba9a0.netlify.app,http://localhost:3000
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    console.log("Incoming Origin:", origin);
-    console.log("Allowed Origins:", allowedOrigins);
-
+    // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
     if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('CORS: origin ' + origin + ' not allowed'));
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Handle preflight for all routes
+app.options('*', cors());
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
