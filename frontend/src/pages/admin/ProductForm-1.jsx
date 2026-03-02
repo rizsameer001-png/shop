@@ -20,24 +20,6 @@ const isValidImage = (file) =>
 
 // Compress + convert to JPEG via Canvas (handles jpg, png, webp, tiff, bmp, gif)
 // TIFF/BMP: browser Canvas reads them via FileReader → drawImage → re-encode as JPEG
-// Target: each image must be under 800KB as base64 (≈600KB raw)
-// Strategy: shrink dimensions then try decreasing quality until it fits
-const TARGET_B64_BYTES = 800 * 1024; // 800 KB base64 string length
-
-const compressToCanvas = (img, maxDim, quality, isSvg) => {
-  let { width, height } = img;
-  if (width > maxDim) { height = Math.round(height * maxDim / width); width = maxDim; }
-  if (height > maxDim) { width = Math.round(width * maxDim / height); height = maxDim; }
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, height);
-  ctx.drawImage(img, 0, 0, width, height);
-  return canvas.toDataURL(isSvg ? "image/png" : "image/jpeg", quality);
-};
-
 const fileToDataURL = (file) =>
   new Promise((res, rej) => {
     const reader = new FileReader();
@@ -46,25 +28,21 @@ const fileToDataURL = (file) =>
       const img = new Image();
       img.onerror = () => rej(new Error(`Cannot decode: ${file.name}`));
       img.onload = () => {
-        const isSvg = file.type === "image/svg+xml";
-
-        // Attempt passes: [maxDim, quality]
-        const passes = [
-          [900, 0.78],
-          [700, 0.72],
-          [600, 0.65],
-          [500, 0.58],
-          [400, 0.50],
-        ];
-
-        for (const [maxDim, quality] of passes) {
-          const dataUrl = compressToCanvas(img, maxDim, quality, isSvg);
-          if (dataUrl.length <= TARGET_B64_BYTES || quality === 0.50) {
-            return res(dataUrl);
-          }
-        }
-        // Fallback — return last attempt regardless
-        res(compressToCanvas(img, 400, 0.50, isSvg));
+        const MAX = 1200;
+        let { width, height } = img;
+        if (width > MAX) { height = Math.round(height * MAX / width); width = MAX; }
+        if (height > MAX) { width = Math.round(width * MAX / height); height = MAX; }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        // White background for transparent PNGs / WebP
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        // SVGs keep as PNG, everything else → JPEG
+        const outFormat = file.type === "image/svg+xml" ? "image/png" : "image/jpeg";
+        res(canvas.toDataURL(outFormat, 0.82));
       };
       img.src = e.target.result;
     };

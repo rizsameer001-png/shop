@@ -12,19 +12,52 @@ connectDB();
 
 const app = express();
 
-// Body parser — 100mb limit for base64 image uploads
-// NOTE: If using a reverse proxy (nginx, Railway, Render, Vercel), you must also
-// configure the proxy's client_max_body_size / request size limit.
-app.use(express.json({ limit: "100mb" }));
-app.use(express.urlencoded({ limit: "100mb", extended: true }));
+// Body parser — 50mb limit for base64 image uploads
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Cookie parser
 app.use(cookieParser());
 
 // Enable CORS
+// app.use(cors({
+//   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+//   credentials: true,
+// }));
+
+// const allowedOrigins = [
+//   'http://localhost:3000',
+//   process.env.FRONTEND_URL
+// ];
+
+// app.use(cors({
+//   origin: function(origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+// }));
+
+// const allowedOrigins = process.env.FRONTEND_URLS
+//   ? process.env.FRONTEND_URLS.split(',')
+//   : [];
+
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+// }));
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
+  origin: "*",
 }));
 
 // Routes
@@ -44,13 +77,6 @@ app.get('/api/health', (req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  // Handle payload too large explicitly
-  if (err.type === 'entity.too.large' || err.status === 413) {
-    return res.status(413).json({
-      success: false,
-      message: 'Request too large. Please compress your images further before uploading. Max payload: 100MB.',
-    });
-  }
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
     success: false,
