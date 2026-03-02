@@ -1,6 +1,7 @@
 
 
-
+https://shop-0nwl.onrender.com 
+https://gleeful-semolina-bba9a0.netlify.app/
 
 
 # 🛍️ ShopNow — Full-Stack ECommerce App with Admin Panel
