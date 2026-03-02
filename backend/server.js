@@ -21,9 +21,26 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 // Cookie parser
 app.use(cookieParser());
 
-// Enable CORS
+
+//Enable CORS
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',
+].filter(Boolean); // removes undefined
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    console.log("Incoming Origin:", origin);
+    console.log("Allowed Origins:", allowedOrigins);
+
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 }));
 
